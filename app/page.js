@@ -24,22 +24,21 @@ export default function Home(){
  const answer=(label,msg)=>{setAnswers(a=>[...a,label]);setReaction(msg);setTimeout(()=>{if(qi<questions.length-1){setQi(qi+1);setReaction("")}else setScreen("music")},900)};
  const dodge=(e)=>{if(noCount>=3)return;if(e)e.preventDefault();setNoCount(n=>n+1)};
  const chooseIce=(choice)=>{setIceChoice(choice);setScreen("secret")};
- const lock=()=>{setSaved(true);setTimeout(()=>setScreen("locked"),1100)};
- const responseText=()=>[
-   "BEFORE THURSDAY — ONE'S RESPONSES 💌",
-   "",
-   ...questions.map((item,i)=>`${i+1}. ${item.q}\n→ ${answers[i]||"No answer"}`),
-   "",
-   `🎧 Song: ${song}${artist?` — ${artist}`:""}`,
-   `🍦 Ice cream: ${iceChoice==="yes"?"Obviously 🍦":"No 😂"}`,
-   `🔒 Question for Thursday: ${secret}`
- ].join("\n");
- const sendResponses=async()=>{
-   const text=responseText();
+ const lock=async()=>{
+   if(saved)return;
+   setSaved(true);
    try{
-     if(navigator.share){await navigator.share({title:"Before Thursday — My Responses",text});}
-     else{await navigator.clipboard.writeText(text);alert("Responses copied! Send them to Kartel on WhatsApp 💌");}
-   }catch(e){if(e?.name!=="AbortError"){try{await navigator.clipboard.writeText(text);alert("Responses copied! Send them to Kartel on WhatsApp 💌");}catch{alert(text)}}}
+     const res=await fetch("/api/responses",{
+       method:"POST",
+       headers:{"Content-Type":"application/json"},
+       body:JSON.stringify({answers,song,artist,iceChoice,secret})
+     });
+     if(!res.ok)throw new Error("delivery failed");
+     setTimeout(()=>setScreen("locked"),700);
+   }catch{
+     setSaved(false);
+     alert("Something went wrong sealing your question. Please try again.");
+   }
  };
  const q=questions[qi];
 
@@ -106,7 +105,7 @@ export default function Home(){
      <div className="finalMark">K × O</div><p className="kicker">ONLINE VERSION ENDS HERE.</p>
      <h1>See you<br/><em>Thursday, One.</em></h1>
      <p className="lead">No more Instagram. No more website.<br/>Just two people finally meeting.</p>
-     <button className="primary" onClick={sendResponses}><span>Send my responses to Kartel</span><b>↗</b></button><p className="sub">This opens your phone’s share menu — choose WhatsApp and send them to Kartel.</p><div className="finalRule"><span/></div>
+     <div className="finalRule"><span/></div>
      <div className="finalBottom"><p>ONE <i>×</i> KARTEL</p><button className="easter" onClick={()=>alert("PROJECT: Before Thursday\nDEVELOPER: Kartel\nBUILT FOR: One\nSTATUS: Ready\nBUGS: Probably\nNERVOUS: Definitely 😂")}>made with questionable amounts of JavaScript.</button></div>
    </section>}
  </main>
