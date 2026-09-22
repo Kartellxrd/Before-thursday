@@ -29,7 +29,7 @@ export async function POST(request) {
 
     const { error } = await resend.emails.send({
       from: "Before Thursday <onboarding@resend.dev>",
-      to: ["kartellxrd@gmail.com"],
+      to: ["phuthego16kago@gmail.com"],
       subject: "💌 One completed Before Thursday",
       text
     });
